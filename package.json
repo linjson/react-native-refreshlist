@@ -1,0 +1,14 @@
+{
+  "name": "react-native-refreshable-listview",
+  "version": "1.0.0",
+  "description": "包括下拉刷新与上拉加载功能的LISTVIEW",
+  "main": "refreshlist.js",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "linjson",
+  "license": "ISC"
+}
