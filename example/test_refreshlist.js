@@ -14,7 +14,7 @@ var {
     Animated,
     PanResponder,
     } = React;
-var RefreshListView = require("react-native-refreshable-listview");
+var RefreshListView = require("react-native-refreshlist");
 var cameraApp = React.createClass({
 
       getInitialState(){
