@@ -27,58 +27,15 @@ var RefrechListView = React.createClass({
 
             //console.log("handleOnMoveShouldSetPanResponder",e.nativeEvent)
 
-            var visibleRows = this.listviewVisibleRows;
-
-            if (this.props.dataSource.getRowCount() == 0) {
-                this.allowPreRefresh = true;
-                return true;
-            }
-
-
-            this.allowPreRefresh = (visibleRows && visibleRows.s1["0"]) || false;
-
-            if (this.allowRefresh || this.allowLoadingMore) {
-                return false;
-            }
-
-            //console.log("==>onMoveShouldSetPanResponder", gestureState.dy);
-
-            //下拉刷新
-            if (this.props.doRefresh && this.allowPreRefresh && gestureState.dy > 0) {
-
-                return true;
-            }
-
-            this.allowPreRefresh=false;
-
-            //上拉加载
-            var count = this.props.dataSource.getRowCount() - 1;
-
-            this.allowPreLoadingMore = (visibleRows.s1[count + ""]) || false;
-
-
-
-            if (this.props.doLoadingMore && this.props.isPullUp && this.allowPreLoadingMore && gestureState.dy < 0) {
-                return true;
-            }
-            this.allowPreLoadingMore=false;
-            return false;
-
-            //if(!this.currentScroll){
-            //    return false;
-            //}
-            //
-            //
             //var visibleRows = this.listviewVisibleRows;
             //
             //if (this.props.dataSource.getRowCount() == 0) {
             //    this.allowPreRefresh = true;
             //    return true;
             //}
-            ////this.listContentInset=e.nativeEvent.contentInset;
-            ////this.curentContentOffset
             //
-            //this.allowPreRefresh = -this.currentScroll.contentInset.top >= this.currentScroll.contentOffset.y;
+            //
+            //this.allowPreRefresh = (visibleRows && visibleRows.s1["0"]) || false;
             //
             //if (this.allowRefresh || this.allowLoadingMore) {
             //    return false;
@@ -92,24 +49,69 @@ var RefrechListView = React.createClass({
             //    return true;
             //}
             //
+            //this.allowPreRefresh=false;
+            //
             ////上拉加载
-            ////var count = this.props.dataSource.getRowCount() - 1;
+            //var count = this.props.dataSource.getRowCount() - 1;
             //
-            ////this.allowPreLoadingMore = (visibleRows.s1[count + ""]) || false;
+            //this.allowPreLoadingMore = (visibleRows.s1[count + ""]) || false;
             //
-            //console.log("上拉加载",this.currentScroll);
             //
-            //this.allowPreLoadingMore = Math.abs(this.currentScroll.contentSize.height - this.currentScroll.layoutMeasurement.height) <=Math.abs(this.currentScroll.contentOffset.y);
             //
             //if (this.props.doLoadingMore && this.props.isPullUp && this.allowPreLoadingMore && gestureState.dy < 0) {
             //    return true;
             //}
+            //this.allowPreLoadingMore=false;
             //return false;
+
+            if (!this.scrollProperties) {
+                return false;
+            }
+
+
+            var visibleRows = this.listviewVisibleRows;
+
+            if (this.props.dataSource.getRowCount() == 0) {
+                this.allowPreRefresh = true;
+                return true;
+            }
+            //this.listContentInset=e.nativeEvent.contentInset;
+            //this.curentContentOffset
+
+            this.allowPreRefresh = this.scrollProperties.offset <= -this.getInitOffset();
+
+            if (this.allowRefresh || this.allowLoadingMore) {
+                return false;
+            }
+
+            //console.log("==>onMoveShouldSetPanResponder", gestureState.dy);
+
+            //下拉刷新
+            if (this.props.doRefresh && this.allowPreRefresh && gestureState.dy > 0) {
+                return true;
+            }
+            this.allowPreRefresh = false;
+            //上拉加载
+            //var count = this.props.dataSource.getRowCount() - 1;
+
+            //this.allowPreLoadingMore = (visibleRows.s1[count + ""]) || false;
+
+            //console.log("上拉加载",this.currentScroll);
+
+            this.allowPreLoadingMore = this.scrollProperties.offset + this.scrollProperties.visibleLength >= this.scrollProperties.contentLength;
+
+            if (this.props.doLoadingMore && this.props.isPullUp && this.allowPreLoadingMore && gestureState.dy < 0) {
+                return true;
+            }
+
+
+            this.allowPreLoadingMore = false;
+            return false;
 
         },
 
         handleOnPanResponderMove(e, gestureState){
-            console.log("==>onPanResponderMove", gestureState.dy);
+            //console.log("==>onPanResponderMove", gestureState.dy);
 
             if (this.allowPreRefresh) {
                 this.allowRefresh = gestureState.dy > this.loadingContainerHeight
@@ -138,7 +140,7 @@ var RefrechListView = React.createClass({
 
         handleOnPanResponderRelease(e, gestureState)
         {
-            console.log("==>onPanResponderRelease");
+            //console.log("==>onPanResponderRelease");
             this.allowPreRefresh = false;
             this.allowPreLoadingMore = false;
             if (this.allowRefresh) {
@@ -181,13 +183,13 @@ var RefrechListView = React.createClass({
         ,
 
 
-//return Promise object;
+        //return Promise object;
         handleRefresh()
         {
             return this.props.doRefresh();
         }
         ,
-
+        //return Promise object;
         handleLoadingMore()
         {
             return this.props.doLoadingMore();
@@ -218,6 +220,24 @@ var RefrechListView = React.createClass({
             </View>;
         }
         ,
+        createFooterView(){
+
+            if (this.props.dataSource.getRowCount() == 0) {
+                return null;
+            }
+
+
+            return <View style={[styles.footView,{height:this.loadingContainerHeight}]}>
+                <Text style={styles.description}>
+                    {this.props.isPullUp ? "加载更多" : "没有更多数据了"}
+                </Text>
+            </View>;
+        },
+
+        getInitOffset(){
+            var offset = this.props.inNavigator ? 64 : 0;
+            return offset;
+        },
         render()
         {
             var animationStyle = (value) => {
@@ -226,19 +246,35 @@ var RefrechListView = React.createClass({
                         translateY: value
                     }]
                 };
-            }
+            };
 
-            return <View style={[{top:64},this.props.style]}>
+            var offset = this.getInitOffset();
+
+            return <View style={[{top:offset},this.props.style]}>
                 {this.createLoadingView({top: 0})}
                 {this.createLoadingView({bottom: 0})}
-                <Animated.View style={[{flex:1,backgroundColor:'red'},animationStyle(this.state.top)]}  {...this.responder.panHandlers}>
-                        <ListView ref="list" style={{}} {...this.props}
-                                  onChangeVisibleRows={(visibleRows,changeRows)=>{
-                                  this.listviewVisibleRows=visibleRows;
+                <Animated.View style={[{flex:1},animationStyle(this.state.top)]}  {...this.responder.panHandlers}>
+                    <ListView ref="list" style={{}} {...this.props}
+                              automaticallyAdjustContentInsets={false}
+                              contentInset={{top:offset,bottom:0,right:0,left:0}}
+                              contentOffset={{x:0,y:-offset}}
+                              renderFooter={this.createFooterView}
+                              onChangeVisibleRows={(visibleRows,changeRows)=>{
+                                        //this.listviewVisibleRows=visibleRows;
+                                        if(!this.initFirst){
+                                            this.scrollProperties=this.refs.list.scrollProperties;
+                                            this.scrollProperties.offset=-offset;
+                                            this.initFirst=true;
+                                        }
+                                        console.log('onChangeVisibleRows',this.refs.list.scrollProperties);
+                                    }}
 
-                              }}
+                              onScroll={(e)=>{
+                                        this.scrollProperties=this.refs.list.scrollProperties;
+                                          console.log('onScroll',this.scrollProperties);
+                                  }}
 
-                            ></ListView>
+                        ></ListView>
 
                 </Animated.View>
             </View>;
@@ -259,14 +295,21 @@ var styles = StyleSheet.create({
     },
     description: {
         marginLeft: 10,
+    },
+    footView: {
+        justifyContent: 'center',
+        alignItems: 'center'
     }
+
 });
 
-//RefrechListView.propTypes = {
-//    isPullUp: PropTypes.boolean,
-//    doRefresh: PropTypes.func,
-//    doLoadingMore: PropTypes.func,
-//}
+RefrechListView.propTypes = {
+    isPullUp: PropTypes.boolean,
+    inNavigator: PropTypes.boolean,
+    doRefresh: PropTypes.func,
+    doLoadingMore: PropTypes.func,
+
+}
 
 
 module.exports = RefrechListView;

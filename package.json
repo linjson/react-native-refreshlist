@@ -1,7 +1,7 @@
 {
-  "name": "react-native-refreshable-listview",
-  "version": "1.0.0",
-  "description": "包括下拉刷新与上拉加载功能的LISTVIEW",
+  "name": "react-native-refreshlist",
+  "version": "1.0.1",
+  "description": "改进等待条出现的判断",
   "main": "refreshlist.js",
   "directories": {
     "example": "example"
