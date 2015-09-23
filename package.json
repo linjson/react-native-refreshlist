@@ -10,5 +10,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "linjson",
-  "license": "ISC"
+  "license": "ISC",
+  "keywords": [
+    "react-component",
+    "react-native",
+    "ios"
+  ],
+  "peerDependencies": {
+    "react-native": ">=0.5"
+  }
 }
